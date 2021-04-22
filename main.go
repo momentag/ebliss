@@ -22,8 +22,7 @@ func main() {
 	app.Version = "v0.1"
 	app.EnableBashCompletion = true
 
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
