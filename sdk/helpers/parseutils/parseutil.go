@@ -263,6 +263,4 @@ func ParseTime(in interface{}) (time.Time, error) {
 	default:
 		return t, errors.New("could not parse datetime")
 	}
-
-	return t, errors.New("could not parse datetime")
 }

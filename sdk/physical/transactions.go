@@ -8,7 +8,7 @@ type TxnEntry struct {
 }
 
 type Transactional interface {
-	Transaction(context.Context, *[]TxnEntry) error
+	Transaction(context.Context, []*TxnEntry) error
 }
 
 type TransactionalBackend interface {

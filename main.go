@@ -6,8 +6,12 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/momentag/ebliss/auth"
 	"github.com/urfave/cli/v2"
+
+	_ "github.com/hashicorp/hcl/v2"
+
+	_ "github.com/momentag/ebliss/config"
+	"github.com/momentag/ebliss/gin"
 )
 
 var (
@@ -24,12 +28,14 @@ func main() {
 		Name:     "ebliss",
 		HelpName: "ebliss",
 		Usage:    "An event-driven enterprise resource planning application",
-		Commands: []*cli.Command{
-			{
-				Name:        "auth",
-				Usage:       "provides authentication utilities, including a server",
-				Subcommands: auth.Commands(),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "friend-addr",
+				Usage: "address to join a cluster",
 			},
+		},
+		Commands: []*cli.Command{
+			gin.Command(),
 		},
 	}
 	app.Version = version
