@@ -10,11 +10,12 @@ import (
 
 	"github.com/armon/go-metrics"
 	"github.com/hashicorp/consul/api"
+	"github.com/momentag/ebliss/sdk/helpers/parseutils"
+	"github.com/momentag/ebliss/sdk/physical"
+	"github.com/momentag/ebliss/sdk/resources"
 	"github.com/rs/zerolog"
 
-	"github.com/momentag/ebliss/sdk/helpers/parseutils"
 	"github.com/momentag/ebliss/sdk/helpers/tlsutils"
-	"github.com/momentag/ebliss/sdk/physical"
 )
 
 const (
@@ -163,7 +164,7 @@ func (c ConsulBackend) Put(ctx context.Context, entry *physical.Entry) error {
 	defer c.permitPool.Release()
 
 	pair := &api.KVPair{
-		Key:   c.path + entry.Key,
+		Key:   c.path + entry.Key.Name,
 		Value: entry.Value,
 	}
 
@@ -178,7 +179,7 @@ func (c ConsulBackend) Put(ctx context.Context, entry *physical.Entry) error {
 	return nil
 }
 
-func (c ConsulBackend) Get(ctx context.Context, key string) (*physical.Entry, error) {
+func (c ConsulBackend) Get(ctx context.Context, key *resources.Variable) (*physical.Entry, error) {
 	defer metrics.MeasureSince([]string{"consul", "get"}, time.Now())
 	c.permitPool.Acquire()
 	defer c.permitPool.Release()
@@ -190,7 +191,7 @@ func (c ConsulBackend) Get(ctx context.Context, key string) (*physical.Entry, er
 		queryOpts.RequireConsistent = true
 	}
 
-	pair, _, err := c.kv.Get(c.path+key, queryOpts)
+	pair, _, err := c.kv.Get(c.path+key.Name, queryOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +251,7 @@ func (c ConsulBackend) Transaction(ctx context.Context, txns []*physical.TxnEntr
 
 	for _, op := range txns {
 		consulOperation := &api.KVTxnOp{
-			Key: c.path + op.Entry.Key,
+			Key: c.path + op.Entry.Key.Name,
 		}
 		switch op.Operation {
 		case physical.DeleteOp:
