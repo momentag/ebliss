@@ -6,26 +6,25 @@ import (
 
 	"github.com/armon/go-metrics"
 	"github.com/dgraph-io/badger/v3"
-	"github.com/momentag/ebliss/sdk/physical"
 	"github.com/momentag/ebliss/sdk/resources"
 )
 
 var (
-	_ physical.Backend       = (*InMemoryBackend)(nil)
-	_ physical.HABackend     = (*InMemoryBackend)(nil)
-	_ physical.Transactional = (*InMemoryBackend)(nil)
+	_ resources.Backend       = (*InMemoryBackend)(nil)
+	_ resources.HABackend     = (*InMemoryBackend)(nil)
+	_ resources.Transactional = (*InMemoryBackend)(nil)
 )
 
 type InMemoryBackend struct {
 	db         *badger.DB
-	permitPool *physical.PermitPool
+	permitPool *resources.PermitPool
 }
 
-func (i InMemoryBackend) Transaction(ctx context.Context, entries []*physical.TxnEntry) error {
+func (i InMemoryBackend) Transaction(ctx context.Context, entries []*resources.TxnEntry) error {
 	panic("implement me")
 }
 
-func (i InMemoryBackend) LockWith(key, value string) (physical.Lock, error) {
+func (i InMemoryBackend) LockWith(key, value string) (resources.Lock, error) {
 	panic("implement me")
 }
 
@@ -33,7 +32,7 @@ func (i InMemoryBackend) HAEnabled() bool {
 	return false
 }
 
-func (i InMemoryBackend) Put(_ context.Context, entry *physical.Entry) error {
+func (i InMemoryBackend) Put(_ context.Context, entry *resources.Entry) error {
 	defer metrics.MeasureSince([]string{"inmem", "put"}, time.Now())
 	i.permitPool.Acquire()
 	defer i.permitPool.Release()
@@ -48,7 +47,7 @@ func (i InMemoryBackend) Put(_ context.Context, entry *physical.Entry) error {
 	})
 }
 
-func (i InMemoryBackend) Get(_ context.Context, key *resources.Variable) (*physical.Entry, error) {
+func (i InMemoryBackend) Get(_ context.Context, key *resources.Variable) (*resources.Entry, error) {
 	defer metrics.MeasureSince([]string{"inmem", "get"}, time.Now())
 	i.permitPool.Acquire()
 	defer i.permitPool.Release()
@@ -66,7 +65,7 @@ func (i InMemoryBackend) Get(_ context.Context, key *resources.Variable) (*physi
 	if err != nil {
 		return nil, err
 	}
-	return &physical.Entry{
+	return &resources.Entry{
 		Key:       key,
 		Value:     val,
 		KeyHash:   nil,
@@ -105,13 +104,13 @@ func (i InMemoryBackend) List(ctx context.Context, prefix string) ([]string, err
 	return keys, nil
 }
 
-func NewInMemoryBackend() (physical.Backend, error) {
+func NewInMemoryBackend() (resources.Backend, error) {
 	opts := badger.DefaultOptions("").WithInMemory(true)
 	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, err
 	}
-	pool := physical.NewPermitPool(1)
+	pool := resources.NewPermitPool(1)
 	c := &InMemoryBackend{
 		db:         db,
 		permitPool: pool,

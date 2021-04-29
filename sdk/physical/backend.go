@@ -3,13 +3,11 @@ package physical
 import (
 	"context"
 	"strings"
-
-	"github.com/momentag/ebliss/sdk/resources"
 )
 
 type Backend interface {
 	Put(ctx context.Context, entry *Entry) error
-	Get(ctx context.Context, key *resources.Variable) (*Entry, error)
+	Get(ctx context.Context, key *Variable) (*Entry, error)
 	Delete(ctx context.Context, key string) error
 	List(ctx context.Context, prefix string) ([]string, error)
 }

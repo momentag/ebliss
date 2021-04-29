@@ -1,10 +1,9 @@
-package resources
+package physical
 
 import (
 	"time"
 
 	dag2 "github.com/heimdalr/dag"
-	"github.com/momentag/ebliss/sdk/physical"
 )
 
 const (
@@ -48,7 +47,7 @@ type Schema struct {
 type Resource struct {
 	Name     string
 	Schema   *Schema
-	Backends []*physical.Backend
+	Backends []*Backend
 }
 
 type ResourceList []*Resource
@@ -57,7 +56,7 @@ func CreateSchemaDAG(list ResourceList) (*dag2.DAG, map[string]string) {
 	dag := dag2.NewDAG()
 	var gmp = make(map[string]string)
 
-	// Add resources
+	// Add physical
 	for _, resource := range list {
 		if id, err := dag.AddVertex(resource); err != nil {
 			panic(err)

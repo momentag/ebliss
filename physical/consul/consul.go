@@ -10,12 +10,7 @@ import (
 
 	"github.com/armon/go-metrics"
 	"github.com/hashicorp/consul/api"
-	"github.com/momentag/ebliss/sdk/helpers/parseutils"
-	"github.com/momentag/ebliss/sdk/physical"
-	"github.com/momentag/ebliss/sdk/resources"
 	"github.com/rs/zerolog"
-
-	"github.com/momentag/ebliss/sdk/helpers/tlsutils"
 )
 
 const (
@@ -179,7 +174,7 @@ func (c ConsulBackend) Put(ctx context.Context, entry *physical.Entry) error {
 	return nil
 }
 
-func (c ConsulBackend) Get(ctx context.Context, key *resources.Variable) (*physical.Entry, error) {
+func (c ConsulBackend) Get(ctx context.Context, key *physical.Variable) (*physical.Entry, error) {
 	defer metrics.MeasureSince([]string{"consul", "get"}, time.Now())
 	c.permitPool.Acquire()
 	defer c.permitPool.Release()
