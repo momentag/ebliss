@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/momentag/ebliss/sdk/resources"
 )
 
 func TestInMemoryBackend(t *testing.T) {
@@ -13,7 +11,7 @@ func TestInMemoryBackend(t *testing.T) {
 	inmem, err := NewInMemoryBackend()
 	assert.Nil(t, err)
 
-	variable := &resources.Variable{
+	variable := &physical.Variable{
 		Name:       "key",
 		Implements: resources.String,
 	}

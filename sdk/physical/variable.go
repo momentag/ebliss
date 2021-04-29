@@ -1,11 +1,9 @@
-package resources
+package physical
 
 import (
 	"fmt"
 
 	"golang.org/x/crypto/blake2b"
-
-	"github.com/momentag/ebliss/sdk/physical"
 )
 
 type Variable struct {
@@ -13,13 +11,13 @@ type Variable struct {
 	Implements byte
 }
 
-func (v *Variable) NewEntry(in string) (*physical.Entry, error) {
+func (v *Variable) NewEntry(in string) (*Entry, error) {
 	keybytes := []byte(v.Name)
 	keybytes = append(keybytes, v.Implements)
 	valbytes := []byte(in)
 	if keyhash, err := blake2b.New(blake2b.BlockSize, keybytes); err != nil {
 		if valhash, err := blake2b.New(blake2b.BlockSize, valbytes); err != nil {
-			return &physical.Entry{
+			return &Entry{
 				Key:       v,
 				Value:     valbytes,
 				KeyHash:   keyhash,

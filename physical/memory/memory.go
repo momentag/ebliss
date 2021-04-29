@@ -6,9 +6,6 @@ import (
 
 	"github.com/armon/go-metrics"
 	"github.com/dgraph-io/badger/v3"
-
-	"github.com/momentag/ebliss/sdk/physical"
-	"github.com/momentag/ebliss/sdk/resources"
 )
 
 var (
@@ -49,7 +46,7 @@ func (i InMemoryBackend) Put(_ context.Context, entry *physical.Entry) error {
 	})
 }
 
-func (i InMemoryBackend) Get(_ context.Context, key *resources.Variable) (*physical.Entry, error) {
+func (i InMemoryBackend) Get(_ context.Context, key *physical.Variable) (*physical.Entry, error) {
 	defer metrics.MeasureSince([]string{"inmem", "get"}, time.Now())
 	i.permitPool.Acquire()
 	defer i.permitPool.Release()

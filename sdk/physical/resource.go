@@ -1,9 +1,7 @@
-package resources
+package physical
 
 import (
 	dag2 "github.com/heimdalr/dag"
-
-	"github.com/momentag/ebliss/sdk/physical"
 )
 
 const (
@@ -35,7 +33,7 @@ type Schema struct {
 type Resource struct {
 	Name     string
 	Schema   *Schema
-	Backends []*physical.Backend
+	Backends []*Backend
 }
 
 type ResourceList []*Resource

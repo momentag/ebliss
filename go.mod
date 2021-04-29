@@ -16,7 +16,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
-	github.com/momentag/ebliss/sdk v0.0.0-20210429130847-4c59d4069625
+	github.com/momentag/ebliss/sdk v0.0.0-20210429135627-df523ededebb
 	github.com/rs/zerolog v1.21.0
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
