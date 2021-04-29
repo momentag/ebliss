@@ -13,6 +13,106 @@ import (
 
 var validCapacityString = regexp.MustCompile("^[\t ]*([-0-9.e+]+)[\t ]?([kmgtKMGT]?[iI]?[bB])?[\t ]*$")
 
+func ParseInt64(in interface{}) (int64, error) {
+	var ret int64
+	if in == nil {
+		return ret, errors.New("input is nil")
+	}
+	jsonIn, ok := in.(json.Number)
+	if ok {
+		in = jsonIn.String()
+	}
+	switch in.(type) {
+	case string:
+		inp := in.(string)
+		if inp == "" {
+			return 0, nil
+		}
+		left, err := strconv.ParseInt(inp, 10, 64)
+		if err != nil {
+			return ret, err
+		}
+		ret = left
+	case int:
+		ret = int64(in.(int))
+	case int8:
+		ret = int64(in.(int8))
+	case int16:
+		ret = int64(in.(int16))
+	case int32:
+		ret = int64(in.(int32))
+	case int64:
+		ret = in.(int64)
+	case uint:
+		ret = int64(in.(uint))
+	case uint8:
+		ret = int64(in.(uint8))
+	case uint16:
+		ret = int64(in.(uint16))
+	case uint32:
+		ret = int64(in.(uint32))
+	case uint64:
+		ret = int64(in.(uint64))
+	case float32:
+		ret = int64(math.Round(float64(in.(float32))))
+	case float64:
+		ret = int64(math.Round(in.(float64)))
+	default:
+		return 0, errors.New("could not parse int from input")
+	}
+	return ret, nil
+}
+
+func ParseUint64(in interface{}) (uint64, error) {
+	var ret uint64
+	if in == nil {
+		return ret, errors.New("input is nil")
+	}
+	jsonIn, ok := in.(json.Number)
+	if ok {
+		in = jsonIn.String()
+	}
+	switch in.(type) {
+	case string:
+		inp := in.(string)
+		if inp == "" {
+			return 0, nil
+		}
+		left, err := strconv.ParseUint(inp, 10, 64)
+		if err != nil {
+			return ret, err
+		}
+		ret = left
+	case int:
+		ret = uint64(in.(int))
+	case int8:
+		ret = uint64(in.(int8))
+	case int16:
+		ret = uint64(in.(int16))
+	case int32:
+		ret = uint64(in.(int32))
+	case int64:
+		ret = uint64(in.(int64))
+	case uint:
+		ret = uint64(in.(uint))
+	case uint8:
+		ret = uint64(in.(uint8))
+	case uint16:
+		ret = uint64(in.(uint16))
+	case uint32:
+		ret = uint64(in.(uint32))
+	case uint64:
+		ret = in.(uint64)
+	case float32:
+		ret = uint64(math.Round(float64(in.(float32))))
+	case float64:
+		ret = uint64(math.Round(in.(float64)))
+	default:
+		return 0, errors.New("could not parse int from input")
+	}
+	return ret, nil
+}
+
 func ParseCapacityString(in interface{}) (uint64, error) {
 	var result uint64
 
@@ -66,30 +166,8 @@ func ParseCapacityString(in interface{}) (uint64, error) {
 	switch inp := in.(type) {
 	case string:
 		return parseString(inp)
-	case int:
-		return uint64(inp), nil
-	case int8:
-		return uint64(inp), nil
-	case int16:
-		return uint64(inp), nil
-	case int32:
-		return uint64(inp), nil
-	case int64:
-		return uint64(inp), nil
-	case uint:
-		return uint64(inp), nil
-	case uint8:
-		return uint64(inp), nil
-	case uint16:
-		return uint64(inp), nil
-	case uint32:
-		return uint64(inp), nil
-	case uint64:
-		return inp, nil
-	case float32:
-		return uint64(math.Round(float64(inp))), nil
-	case float64:
-		return uint64(math.Round(inp)), nil
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
+		return ParseUint64(inp)
 	default:
 		return result, errors.New("could not parse capacity from input")
 	}
@@ -124,35 +202,65 @@ func ParseDurationSecond(in interface{}) (time.Duration, error) {
 	}
 
 	switch inp := in.(type) {
+	case bool:
+		return 0, fmt.Errorf("cannot parse duration from boolean value")
 	case string:
 		return parseString(inp)
-	case int:
-		return time.Duration(inp) * time.Second, nil
-	case int8:
-		return time.Duration(inp) * time.Second, nil
-	case int16:
-		return time.Duration(inp) * time.Second, nil
-	case int32:
-		return time.Duration(inp) * time.Second, nil
-	case int64:
-		return time.Duration(inp) * time.Second, nil
-	case uint:
-		return time.Duration(inp) * time.Second, nil
-	case uint8:
-		return time.Duration(inp) * time.Second, nil
-	case uint16:
-		return time.Duration(inp) * time.Second, nil
-	case uint32:
-		return time.Duration(inp) * time.Second, nil
-	case uint64:
-		return time.Duration(inp) * time.Second, nil
-	case float32:
-		return time.Duration(inp) * time.Second, nil
-	case float64:
-		return time.Duration(inp) * time.Second, nil
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
+		val, err := ParseInt64(inp)
+		if err != nil {
+			return dur, err
+		}
+		return time.Duration(val) * time.Second, nil
 	case time.Duration:
 		return inp, nil
 	default:
 		return 0, fmt.Errorf("could not parse duration from input %v", in)
+	}
+}
+
+func ParseTime(in interface{}) (time.Time, error) {
+	var t time.Time
+
+	if in == nil {
+		return time.Time{}, nil
+	}
+
+	jsonIn, ok := in.(json.Number)
+	if ok {
+		in = jsonIn.String()
+	}
+
+	parseString := func(input string) (time.Time, error) {
+		if input == "" {
+			return t, fmt.Errorf("input string is empty")
+		}
+		var err error
+		t, err := time.Parse(time.RFC3339Nano, input)
+		if err == nil {
+			return t, nil
+		}
+		t, err = time.Parse(time.RFC3339, input)
+		if err == nil {
+			return t, nil
+		}
+		epoch, err := strconv.ParseInt(input, 10, 64)
+		if err == nil {
+			return time.Unix(epoch, 0), nil
+		}
+		return t, errors.New("could not parse string as datetime")
+	}
+
+	switch inp := in.(type) {
+	case string:
+		return parseString(inp)
+	case int, int8, int16, int32, uint, uint8, uint16, uint32, uint64:
+		intValue, err := ParseInt64(inp)
+		if err != nil {
+			return t, err
+		}
+		return time.Unix(intValue, 0), nil
+	default:
+		return t, errors.New("could not parse datetime")
 	}
 }
