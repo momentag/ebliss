@@ -11,7 +11,17 @@ type Variable struct {
 	Implements byte
 }
 
-func (v *Variable) NewEntry(in string) (*Entry, error) {
+func (v *Variable) NewEntry(in string) *Entry {
+	valbytes := []byte(in)
+	return &Entry{
+		Key:       v,
+		Value:     valbytes,
+		KeyHash:   nil,
+		ValueHash: nil,
+	}
+}
+
+func (v *Variable) NewHashedEntry(in string) (*Entry, error) {
 	keybytes := []byte(v.Name)
 	keybytes = append(keybytes, v.Implements)
 	valbytes := []byte(in)
