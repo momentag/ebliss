@@ -1,4 +1,4 @@
-package physical
+package resources
 
 import (
 	"testing"

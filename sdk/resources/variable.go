@@ -1,0 +1,33 @@
+package resources
+
+import (
+	"fmt"
+
+	"golang.org/x/crypto/blake2b"
+
+	"github.com/momentag/ebliss/sdk/physical"
+)
+
+type Variable struct {
+	Name       string
+	Implements byte
+}
+
+func (v *Variable) NewEntry(in string) (*physical.Entry, error) {
+	keybytes := []byte(v.Name)
+	keybytes = append(keybytes, v.Implements)
+	valbytes := []byte(in)
+	if keyhash, err := blake2b.New(blake2b.BlockSize, keybytes); err != nil {
+		if valhash, err := blake2b.New(blake2b.BlockSize, valbytes); err != nil {
+			return &physical.Entry{
+				Key:       v,
+				Value:     valbytes,
+				KeyHash:   keyhash,
+				ValueHash: valhash,
+			}, nil
+		}
+	} else {
+		return nil, err
+	}
+	return nil, fmt.Errorf("could not created new entry")
+}

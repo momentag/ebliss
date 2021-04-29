@@ -1,9 +1,9 @@
-package physical
+package resources
 
 import (
-	"time"
-
 	dag2 "github.com/heimdalr/dag"
+
+	"github.com/momentag/ebliss/sdk/physical"
 )
 
 const (
@@ -27,18 +27,6 @@ type Relationship struct {
 	Resource *Resource
 }
 
-type VariableMeta struct {
-	Id        string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-type Variable struct {
-	Name         string
-	Implements   byte
-	VariableMeta *VariableMeta
-}
-
 type Schema struct {
 	Variables     []*Variable
 	Relationships []*Relationship
@@ -47,7 +35,7 @@ type Schema struct {
 type Resource struct {
 	Name     string
 	Schema   *Schema
-	Backends []*Backend
+	Backends []*physical.Backend
 }
 
 type ResourceList []*Resource
