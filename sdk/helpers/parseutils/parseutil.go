@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
@@ -107,6 +108,56 @@ func ParseUint64(in interface{}) (uint64, error) {
 		ret = uint64(math.Round(float64(in.(float32))))
 	case float64:
 		ret = uint64(math.Round(in.(float64)))
+	default:
+		return 0, errors.New("could not parse int from input")
+	}
+	return ret, nil
+}
+
+func ParseFloat64(in interface{}) (float64, error) {
+	var ret float64
+	if in == nil {
+		return ret, errors.New("input is nil")
+	}
+	jsonIn, ok := in.(json.Number)
+	if ok {
+		in = jsonIn.String()
+	}
+	switch in.(type) {
+	case string:
+		inp := in.(string)
+		if inp == "" {
+			return 0, nil
+		}
+		left, err := strconv.ParseFloat(inp, 64)
+		if err != nil {
+			return ret, err
+		}
+		ret = left
+	case int:
+		ret = float64(in.(int))
+	case int8:
+		ret = float64(in.(int8))
+	case int16:
+		ret = float64(in.(int16))
+	case int32:
+		ret = float64(in.(int32))
+	case int64:
+		ret = float64(in.(int64))
+	case uint:
+		ret = float64(in.(uint))
+	case uint8:
+		ret = float64(in.(uint8))
+	case uint16:
+		ret = float64(in.(uint16))
+	case uint32:
+		ret = float64(in.(uint32))
+	case uint64:
+		ret = float64(in.(uint64))
+	case float32:
+		ret = float64(in.(float32))
+	case float64:
+		ret = in.(float64)
 	default:
 		return 0, errors.New("could not parse int from input")
 	}
@@ -263,4 +314,30 @@ func ParseTime(in interface{}) (time.Time, error) {
 	default:
 		return t, errors.New("could not parse datetime")
 	}
+}
+
+func ParseBytes(in interface{}) ([]byte, error) {
+	switch input := in.(type) {
+	case string:
+		return []byte(input), nil
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		if val, err := ParseInt64(input); err != nil {
+			return big.NewInt(val).GobEncode()
+		} else {
+			return nil, err
+		}
+	case float32, float64:
+		if val, err := ParseFloat64(input); err != nil {
+			return big.NewFloat(val).GobEncode()
+		} else {
+			return nil, err
+		}
+	case json.Number:
+		return []byte(input.String()), nil
+	case json.RawMessage:
+		return input.MarshalJSON()
+	default:
+		return nil, fmt.Errorf("could not parse into bytes")
+	}
+	return nil, fmt.Errorf("could not parse into bytes")
 }

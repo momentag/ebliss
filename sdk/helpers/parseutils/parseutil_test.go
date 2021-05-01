@@ -235,14 +235,16 @@ func TestParseTime(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		actual, err := ParseTime(tc.inp)
-		if tc.valid {
-			assert.Nil(t, err, fmt.Sprintf("errored for k=%v and expected %v but got %v", tc.inp, tc.expected, actual))
-			assert.Equal(t, tc.expected.UTC(), actual.UTC(), fmt.Sprintf("k=%v and expected %v but got %v", tc.inp, tc.expected, actual))
-		} else {
-			assert.NotNil(t, err)
-		}
+	for idx, tc := range tests {
+		t.Run(fmt.Sprintf("Test %v", idx), func(t *testing.T) {
+			actual, err := ParseTime(tc.inp)
+			if tc.valid {
+				assert.Nil(t, err, fmt.Sprintf("errored for k=%v and expected %v but got %v", tc.inp, tc.expected, actual))
+				assert.Equal(t, tc.expected.UTC(), actual.UTC(), fmt.Sprintf("k=%v and expected %v but got %v", tc.inp, tc.expected, actual))
+			} else {
+				assert.NotNil(t, err)
+			}
+		})
 	}
 
 }

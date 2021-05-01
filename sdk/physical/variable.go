@@ -1,8 +1,7 @@
 package physical
 
 import (
-	"fmt"
-
+	"github.com/momentag/ebliss/sdk/helpers/parseutils"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -11,31 +10,35 @@ type Variable struct {
 	Implements byte
 }
 
-func (v *Variable) NewEntry(in string) *Entry {
-	valbytes := []byte(in)
-	return &Entry{
-		Key:       v,
-		Value:     valbytes,
-		KeyHash:   nil,
-		ValueHash: nil,
+func (v *Variable) NewEntry(in interface{}) (Entry, bool) {
+	if val, err := parseutils.ParseBytes(in); err != nil {
+		return Entry{
+			Key:       v,
+			Value:     val,
+			KeyHash:   nil,
+			ValueHash: nil,
+		}, true
 	}
+	return Entry{
+		Key: v, Value: nil, KeyHash: nil, ValueHash: nil,
+	}, false
 }
 
-func (v *Variable) NewHashedEntry(in string) (*Entry, error) {
+func (v *Variable) NewHashedEntry(in string) (Entry, bool) {
+	blake, err := blake2b.New512(nil)
+	if err != nil {
+		return Entry{}, false
+	}
 	keybytes := []byte(v.Name)
 	keybytes = append(keybytes, v.Implements)
 	valbytes := []byte(in)
-	if keyhash, err := blake2b.New(blake2b.BlockSize, keybytes); err != nil {
-		if valhash, err := blake2b.New(blake2b.BlockSize, valbytes); err != nil {
-			return &Entry{
-				Key:       v,
-				Value:     valbytes,
-				KeyHash:   keyhash,
-				ValueHash: valhash,
-			}, nil
-		}
-	} else {
-		return nil, err
-	}
-	return nil, fmt.Errorf("could not created new entry")
+	var keyhash, valhash []byte
+	keyhash = blake.Sum(keybytes)
+	valhash = blake.Sum(valbytes)
+	return Entry{
+		Key:       v,
+		Value:     valbytes,
+		KeyHash:   keyhash,
+		ValueHash: valhash,
+	}, true
 }
