@@ -1,14 +1,20 @@
 package logical
 
 type Entry struct {
-	Key   *Variable
-	Value *Value
+	Key   Variable
+	Value Value
 }
 
-type Document []*Entry
+type Document struct {
+	Key     string
+	Entries []*Entry
+}
 
 type Collection []*Document
 
-type Record map[Variable]*Collection
+type Record struct {
+	Key         string
+	Collections []*Collection
+}
 
 type Table []*Record

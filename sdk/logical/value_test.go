@@ -334,4 +334,9 @@ func Test_NegativeEncodeDecode(t *testing.T) {
 	_, err = DecodeValue(nil)
 	assert.NotNil(t, err)
 
+	// Decoding random bytes should not decode into
+	// a Value
+	_, err = DecodeValue([]byte{1, 2, 5})
+	assert.NotNil(t, err)
+
 }

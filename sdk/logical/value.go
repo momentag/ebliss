@@ -1,11 +1,11 @@
 package logical
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"math/big"
 	"time"
+
+	"github.com/momentag/ebliss/sdk/helpers/gobutils"
 )
 
 const (
@@ -66,9 +66,9 @@ func AssertValue(in interface{}, kind byte) bool {
 		return kind == Float32
 	case float64:
 		return kind == Float64
-	case big.Int, *big.Int:
+	case *big.Int:
 		return kind == BigInt
-	case big.Float, *big.Float:
+	case *big.Float:
 		return kind == BigFloat
 	case time.Time:
 		return kind == Timestamp
@@ -94,38 +94,26 @@ func NewValue(in interface{}, kind byte) (Value, error) {
 }
 
 func DecodeValue(in []byte) (Value, error) {
-	reader := bytes.NewReader(in)
-	decoder := gob.NewDecoder(reader)
 	var value Value
-	err := decoder.Decode(&value)
+	err := gobutils.DecodeData(in, &value)
 	return value, err
 }
 
+func (v *Value) Encode() []byte {
+	buf, _ := gobutils.EncodeInterface(v)
+	return buf.Bytes()
+}
+
 func (v *Value) EncodeContent(in interface{}) error {
-	buf := new(bytes.Buffer)
-	enc := gob.NewEncoder(buf)
-	if err := enc.Encode(in); err != nil {
-		return fmt.Errorf("cannot encode input (%v)", err.Error())
+	if buf, err := gobutils.EncodeInterface(in); err != nil {
+		return err
 	} else {
-		v.Content = buf.Bytes()
 		v.Size = buf.Len()
+		v.Content = buf.Bytes()
 		return nil
 	}
 }
 
 func (v *Value) DecodeContent(out interface{}) error {
-	reader := bytes.NewReader(v.Content)
-	decoder := gob.NewDecoder(reader)
-	if err := decoder.Decode(out); err != nil {
-		return fmt.Errorf("could not decode variable")
-	} else {
-		return nil
-	}
-}
-
-func (v *Value) Encode() []byte {
-	buf := new(bytes.Buffer)
-	enc := gob.NewEncoder(buf)
-	_ = enc.Encode(v)
-	return buf.Bytes()
+	return gobutils.DecodeData(v.Content, out)
 }
