@@ -6,7 +6,7 @@ require (
 	github.com/armon/go-metrics v0.3.3
 	github.com/dgraph-io/badger/v3 v3.2011.1
 	github.com/frankban/quicktest v1.12.1 // indirect
-	github.com/gin-gonic/gin v1.7.1
+	github.com/gin-gonic/gin v1.7.7
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/golang/snappy v0.0.1
 	github.com/google/uuid v1.2.0
